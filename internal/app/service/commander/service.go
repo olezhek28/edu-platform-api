@@ -14,8 +14,6 @@ type Service struct {
 
 	bot     *tgBotAPI.BotAPI
 	updates tgBotAPI.UpdatesChannel
-
-	commands map[string]func()
 }
 
 func NewCommanderService(
