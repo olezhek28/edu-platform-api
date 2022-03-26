@@ -5,6 +5,8 @@ import (
 
 	tgBotAPI "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/olezhek28/edu-platform-api/internal/app/config"
+	"github.com/olezhek28/edu-platform-api/internal/app/service/commander"
+	"github.com/olezhek28/edu-platform-api/internal/app/service/lesson"
 )
 
 func main() {
@@ -15,12 +17,8 @@ func main() {
 
 	bot, err := tgBotAPI.NewBotAPI(cfg.TelegramToken)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
-
-	bot.Debug = true
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	u := tgBotAPI.UpdateConfig{
 		Timeout: 60,
@@ -28,13 +26,11 @@ func main() {
 
 	updates := bot.GetUpdatesChan(u)
 
-	for update := range updates {
-		if update.Message != nil { // If we got a message
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+	lessonService := lesson.NewLessonService()
+	commanderService := commander.NewCommanderService(lessonService, bot, updates)
 
-			msg := tgBotAPI.NewMessage(update.Message.Chat.ID, "You wrote:"+update.Message.Text)
-
-			bot.Send(msg)
-		}
+	err = commanderService.CommandHandler()
+	if err != nil {
+		log.Fatalf("app crash: %s", err.Error())
 	}
 }
