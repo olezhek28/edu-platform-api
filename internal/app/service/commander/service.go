@@ -73,7 +73,12 @@ func (s *Service) CommandHandler() error {
 				if err != nil {
 					return nil
 				}
+			case "help":
+				msgStr := fmt.Sprintf("/add\n/delete\n/list\n/update")
+				msg := tgBotAPI.NewMessage(update.Message.Chat.ID, msgStr)
+				s.bot.Send(msg)
 			}
+
 		}
 	}
 
